@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_tutorial/ui/widgets/round_button.dart';
 import 'package:firebase_tutorial/utils/utils.dart';
@@ -49,21 +51,30 @@ class _AddPostsState extends State<AddPosts> {
                       .set({
                     'id': DateTime.now().millisecondsSinceEpoch.toString(),
                     'title': postController.text.toString(),
-                  }).then((value) {
-                    setState(() {
-                      isLoading = false;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Data Added'),
-                      ),
-                    );
-                  }).onError((error, stackTrace) {
-                    setState(() {
-                      isLoading = false;
-                    });
-                    Utils().toastMessage(error.toString());
-                  });
+                  }).then(
+                    (value) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Data Added'),
+                        ),
+                      );
+                      Timer(const Duration(seconds: 1), () {
+                        Navigator.pop(context);
+                      });
+                    },
+                  ).onError(
+                    (error, stackTrace) {
+                      setState(
+                        () {
+                          isLoading = false;
+                        },
+                      );
+                      Utils().toastMessage(error.toString());
+                    },
+                  );
                 },
               ),
             ],
