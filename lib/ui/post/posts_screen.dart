@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:firebase_tutorial/ui/auth/login_screen.dart';
 import 'package:firebase_tutorial/ui/post/add_posts.dart';
+import 'package:firebase_tutorial/utils/utils.dart';
 import 'package:flutter/material.dart';
 
 class PostsScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _PostsScreenState extends State<PostsScreen> {
 
   final reference = FirebaseDatabase.instance.ref('Post');
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController updateTitleController = TextEditingController();
 
   @override
   void dispose() {
@@ -73,14 +75,72 @@ class _PostsScreenState extends State<PostsScreen> {
                 query: reference,
                 itemBuilder: (context, snapshot, animation, index) {
                   final title = snapshot.child('title').value.toString();
+                  final id = snapshot.child('id').value.toString();
                   if (searchController.text.isEmpty) {
-                    return ListTile(
-                      title: Text(snapshot.child('title').value.toString()),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      child: ListTile(
+                        tileColor: Colors.greenAccent,
+                        title: Text(
+                          title,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        subtitle: Text(id),
+                        trailing: PopupMenuButton(
+                          icon: const Icon(Icons.more_vert),
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              child: ListTile(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  showMyDialog(title, id);
+                                },
+                                title: const Text('Edit'),
+                                trailing: const Icon(
+                                  Icons.edit,
+                                ),
+                              ),
+                            ),
+                            PopupMenuItem(
+                              child: ListTile(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  reference
+                                      .child(id)
+                                      .remove()
+                                      .then((value) =>
+                                          Utils().toastMessage('Deleted'))
+                                      .onError(
+                                        (error, stackTrace) =>
+                                            Utils().toastMessage(
+                                          error.toString(),
+                                        ),
+                                      );
+                                },
+                                title: const Text('Delete'),
+                                trailing: const Icon(
+                                  Icons.delete,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   } else if (title.toLowerCase().contains(
                       searchController.text.toLowerCase().toString())) {
-                    return ListTile(
-                      title: Text(title),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      child: ListTile(
+                        tileColor: Colors.greenAccent,
+                        title: Text(
+                          title,
+                          style: const TextStyle(fontSize: 22),
+                        ),
+                        subtitle: Text(snapshot.child('id').value.toString()),
+                      ),
                     );
                   } else {
                     return const SizedBox.shrink();
@@ -124,6 +184,45 @@ class _PostsScreenState extends State<PostsScreen> {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Future<void> showMyDialog(String title, String id) async {
+    updateTitleController.text = title;
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: TextFormField(
+          controller: updateTitleController,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+
+              reference
+                  .child(id)
+                  .update({
+                    'title': updateTitleController.text.toString(),
+                  })
+                  .then((value) => Utils().toastMessage('Updated'))
+                  .onError(
+                    (error, stackTrace) => Utils().toastMessage(
+                      error.toString(),
+                    ),
+                  );
+            },
+            child: const Text('Update'),
+          ),
+        ],
       ),
     );
   }

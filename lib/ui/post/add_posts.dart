@@ -46,10 +46,10 @@ class _AddPostsState extends State<AddPosts> {
                   setState(() {
                     isLoading = true;
                   });
-                  firebaseDatabase
-                      .child(DateTime.now().millisecondsSinceEpoch.toString())
-                      .set({
-                    'id': DateTime.now().millisecondsSinceEpoch.toString(),
+                  final String id =
+                      DateTime.now().millisecondsSinceEpoch.toString();
+                  firebaseDatabase.child(id).set({
+                    'id': id,
                     'title': postController.text.toString(),
                   }).then(
                     (value) {
@@ -61,9 +61,7 @@ class _AddPostsState extends State<AddPosts> {
                           content: Text('Data Added'),
                         ),
                       );
-                      Timer(const Duration(seconds: 1), () {
-                        Navigator.pop(context);
-                      });
+                      Navigator.pop(context);
                     },
                   ).onError(
                     (error, stackTrace) {
