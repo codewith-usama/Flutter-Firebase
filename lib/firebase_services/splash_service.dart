@@ -1,8 +1,7 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_tutorial/firestore_services/firestore_list_screen.dart';
 import 'package:firebase_tutorial/ui/auth/login_screen.dart';
-import 'package:firebase_tutorial/ui/post/posts_screen.dart';
 import 'package:flutter/material.dart';
 
 class SplashService {
@@ -16,7 +15,7 @@ class SplashService {
         () {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => const PostsScreen(),
+              builder: (context) => const FireStoreListScreen(),
             ),
           );
         },
